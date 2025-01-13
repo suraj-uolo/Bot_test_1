@@ -1,7 +1,7 @@
 import os
 import time
 import streamlit as st
-import openai              # <--- Changed this line
+import openai              # <--- Using openai instead of from openai import OpenAI
 from dotenv import load_dotenv
 import base64
 from io import StringIO
@@ -158,7 +158,7 @@ st.markdown(
     /* Send button styling inside forms (Blue) */
     .stButton button {
         background-color: #1976D2 !important;
-        color: #ffffff !important;
+        color: #f2f2f2 !important; /* <--- Changed to a lighter text color */
         font-weight: 600;
         border: none;
         border-radius: 4px;
@@ -171,7 +171,7 @@ st.markdown(
     }
     .stButton button:hover {
         background-color: #115293 !important;
-        color: #ffffff !important;
+        color: #ffffff !important; /* White text on hover */
     }
 
     /* Slightly larger input text and spacing for better accessibility */
@@ -234,9 +234,7 @@ def chatbot_response(user_input):
     truncate_history_if_needed()
 
     try:
-        # Note: For the newest openai library, it's usually openai.ChatCompletion.create()
-        # If your library version is older or you specifically need client.chat.completions,
-        # keep it as is. Either should work if you have the correct version.
+        # If you're using a newer openai library, you may prefer openai.ChatCompletion.create
         response = client.chat.completions.create(
             model="ft:gpt-4o-mini-2024-07-18:uolo-ai:uolobot-2:Ao6BTB9X",
             messages=st.session_state.conversation_history,
@@ -346,4 +344,3 @@ if st.button("Clear Chat"):
 download_link = get_download_link()
 st.markdown(download_link, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
-
