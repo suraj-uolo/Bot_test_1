@@ -6,37 +6,17 @@ from dotenv import load_dotenv
 import base64
 from io import StringIO
 
-# -------------------------------
-#       SETUP & CONFIG
-# -------------------------------
-
-# Load environment variables (optional, for local dev)
 load_dotenv()
 
-# Attempt to retrieve key from Streamlit secrets; if not found, use local env
 api_key = st.secrets["OPENAI_API_KEY"] if "OPENAI_API_KEY" in st.secrets else os.getenv("OPENAI_API_KEY")
-
-# Raise an error if the key is missing
 if not api_key:
     raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY in Streamlit secrets or a local .env file.")
 
-# Set the global OpenAI API key
 openai.api_key = api_key
-
-# Initialize OpenAI client (preserving your variable name)
 client = openai
-
-# Max conversation messages to keep (for user & assistant each)
 MAX_HISTORY_LENGTH = 10
 
-# Streamlit page config
-st.set_page_config(
-    page_title="UoloBot_2",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
-# Inject a meta tag to improve mobile responsiveness
+st.set_page_config(page_title="UoloBot_2", layout="wide", initial_sidebar_state="collapsed")
 st.markdown(
     """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,13 +24,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# -------------------------------
-#   CUSTOM STYLING FOR UI
-# -------------------------------
 st.markdown(
     """
     <style>
-    /* Use a simpler gradient or background color for easier reading. */
     .stApp {
         background: linear-gradient(135deg, #F1F8E9 0%, #FFFFFF 100%) !important;
         font-family: "Helvetica Neue", Arial, sans-serif;
@@ -58,18 +34,13 @@ st.markdown(
         margin: 0 !important;
         padding: 0 !important;
         box-sizing: border-box;
-        /* Let height auto-adjust so content can scroll properly on mobile. */
         height: auto !important;
         display: flex;
         flex-direction: column;
     }
-
-    /* Slightly larger base font for better readability on mobile devices */
     html, body, [class*="css"] {
         font-size: 1rem;
     }
-
-    /* Title and welcome message with minimal margins */
     .title {
         font-size: 1.3rem;
         text-align: center;
@@ -84,30 +55,22 @@ st.markdown(
         padding: 2px 0 10px 0 !important;
         color: #555;
     }
-
-    /* Let the conversation box grow and shrink with available space,
-       with a minimum height to remain usable on large screens. */
     .conversation-box {
         border: 1px solid #ddd;
         background-color: #fafafa;
         border-radius: 6px;
         padding: 0.5rem;
         margin: 0.5rem;
-        min-height: 25vh;  /* fallback for larger devices */
-        flex-grow: 1;      /* allow the box to grow with content */
-        overflow-y: auto;  /* scroll within the box if messages overflow */
+        min-height: 25vh;
+        flex-grow: 1;
+        overflow-y: auto;
     }
-
-    /* Increase conversation box height on smaller screens (e.g., phones).
-       Using max-height instead of fixed height for a more fluid experience. */
     @media (max-width: 600px) {
         .conversation-box {
             min-height: 40vh !important;
-            max-height: 70vh; /* it can grow but won't push everything off-screen */
+            max-height: 70vh;
         }
     }
-
-    /* Properly wrap long text in messages */
     .user-message, .bot-message {
         word-wrap: break-word;
         padding: 8px 10px;
@@ -115,22 +78,16 @@ st.markdown(
         border-radius: 4px;
         font-size: 0.95rem;
     }
-
-    /* Style for user messages */
     .user-message {
         background-color: #e8f4ff;
         border: 1px solid #c9e8ff;
         color: #0d47a1;
     }
-
-    /* Style for bot messages */
     .bot-message {
         background-color: #f0fff4;
         border: 1px solid #c2f2d0;
         color: #1b5e20;
     }
-
-    /* Download link style (Purple button) */
     a.download-link {
         color: #ffffff !important;
         background-color: #6A1B9A;
@@ -145,8 +102,6 @@ st.markdown(
         background-color: #4A148C;
         text-decoration: none;
     }
-
-    /* Clear Chat button styling (Red) */
     .css-1q8dd3e, .css-h2pz5l {
         background-color: #D32F2F !important;
         color: #ffffff !important;
@@ -163,8 +118,6 @@ st.markdown(
         background-color: #B71C1C !important;
         color: #f2f2f2 !important;
     }
-    
-    /* Send button styling inside forms (Blue) */
     .stButton button {
         background-color: #1976D2 !important;
         color: #f2f2f2 !important;
@@ -182,8 +135,6 @@ st.markdown(
         background-color: #115293 !important;
         color: #ffffff !important;
     }
-
-    /* Slightly larger input text and spacing for better accessibility */
     .stTextInput label {
         font-size: 1rem;
         font-weight: 600;
@@ -197,16 +148,12 @@ st.markdown(
         border: 1px solid #ccc !important;
         border-radius: 4px !important;
     }
-
-    /* Action buttons container - minimal vertical space */
     .action-buttons {
         display: flex;
         flex-direction: column;
         gap: 6px;
         margin: 4px 0.5rem 1rem 0.5rem;
     }
-
-    /* Style the scrollbar for the conversation box if content overflows */
     .conversation-box::-webkit-scrollbar {
         width: 6px;
     }
@@ -219,14 +166,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# -------------------------------
-#       HELPER FUNCTIONS
-# -------------------------------
 def truncate_history_if_needed():
-    """
-    Ensures the conversation history does not exceed the max allowed length.
-    Removes older messages while keeping the system prompt.
-    """
     if len(st.session_state.conversation_history) > (2 * MAX_HISTORY_LENGTH + 1):
         excess_count = len(st.session_state.conversation_history) - (2 * MAX_HISTORY_LENGTH + 1)
         st.session_state.conversation_history = (
@@ -235,10 +175,6 @@ def truncate_history_if_needed():
         )
 
 def chatbot_response(user_input):
-    """
-    Sends the user's message to the OpenAI API and retrieves the bot's response.
-    Adds both the user's message and the bot's reply to the conversation history.
-    """
     st.session_state.conversation_history.append({"role": "user", "content": user_input})
     truncate_history_if_needed()
 
@@ -262,15 +198,9 @@ def chatbot_response(user_input):
         )
 
 def clear_chat():
-    """
-    Clears the conversation history, preserving only the system message.
-    """
     st.session_state.conversation_history = st.session_state.conversation_history[:1]
 
 def get_download_link():
-    """
-    Returns an HTML link that allows users to download the current chat history as a .txt file.
-    """
     chat_text = []
     for msg in st.session_state.conversation_history:
         if msg["role"] == "user":
@@ -285,9 +215,6 @@ def get_download_link():
     href = f'<a href="data:file/txt;base64,{b64}" download="chat_history.txt" class="download-link">Download Chat</a>'
     return href
 
-# -------------------------------
-#   INITIALIZE SESSION STATE
-# -------------------------------
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = [
         {
@@ -301,20 +228,13 @@ if "conversation_history" not in st.session_state:
         }
     ]
 
-# -------------------------------
-#         APP LAYOUT
-# -------------------------------
-
-# Title and Welcome Message (no space above)
 st.markdown('<div class="title">UoloBot_2</div>', unsafe_allow_html=True)
 st.markdown('<div class="welcome">Welcome! I am UoloBot, here to assist you.</div>', unsafe_allow_html=True)
 
-# Container to display chat
 def render_chat():
     chat_html = "<div class='conversation-box'>"
     for msg in st.session_state.conversation_history:
         if msg["role"] == "system":
-            # Skip system messages or handle them differently if desired
             continue
         elif msg["role"] == "user":
             chat_html += f"<div class='user-message'>You: {msg['content']}</div>"
@@ -323,36 +243,23 @@ def render_chat():
     chat_html += "</div>"
     st.markdown(chat_html, unsafe_allow_html=True)
 
-# Callback for handling user input
 def handle_message():
     user_text = st.session_state["user_input_key"]
     if user_text.strip():
         with st.spinner("UoloBot_2 is typing..."):
-            time.sleep(1.0)  # Optional simulated delay
+            time.sleep(1.0)
             chatbot_response(user_text.strip())
-    # Clear the text input
     st.session_state["user_input_key"] = ""
 
-# Render chat box
 render_chat()
 
-# User input form + Send button
 with st.form("user_input_form", clear_on_submit=True):
-    st.text_input(
-        "",
-        key="user_input_key",
-        placeholder="Enter your message here..."
-    )
+    st.text_input("", key="user_input_key", placeholder="Enter your message here...")
     st.form_submit_button("Send", on_click=handle_message)
 
-# Container for additional buttons (Clear Chat, Download Chat)
 st.markdown("<div class='action-buttons'>", unsafe_allow_html=True)
 if st.button("Clear Chat"):
     clear_chat()
-
-download_link = get_download_link()
-st.markdown(download_link, unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)
 
 download_link = get_download_link()
 st.markdown(download_link, unsafe_allow_html=True)
