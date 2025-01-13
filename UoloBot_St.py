@@ -50,7 +50,7 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* Use a smoother, simpler gradient or background color for easier reading. */
+    /* Use a simpler gradient or background color for easier reading. */
     .stApp {
         background: linear-gradient(135deg, #F1F8E9 0%, #FFFFFF 100%) !important;
         font-family: "Helvetica Neue", Arial, sans-serif;
@@ -341,9 +341,7 @@ with st.form("user_input_form", clear_on_submit=True):
     st.text_input(
         "",
         key="user_input_key",
-        placeholder="Enter your message here...",
-        # Add aria-label for better accessibility in screen readers
-        aria_label="Chat input field"
+        placeholder="Enter your message here..."
     )
     st.form_submit_button("Send", on_click=handle_message)
 
@@ -351,6 +349,10 @@ with st.form("user_input_form", clear_on_submit=True):
 st.markdown("<div class='action-buttons'>", unsafe_allow_html=True)
 if st.button("Clear Chat"):
     clear_chat()
+
+download_link = get_download_link()
+st.markdown(download_link, unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 download_link = get_download_link()
 st.markdown(download_link, unsafe_allow_html=True)
