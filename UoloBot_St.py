@@ -11,8 +11,7 @@ from io import StringIO
 # -------------------------------
 
 # Load environment variables
-load_dotenv(".env")
-api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 if not api_key:
     raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY in your .env file.")
