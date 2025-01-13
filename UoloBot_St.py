@@ -1,7 +1,7 @@
 import os
 import time
 import streamlit as st
-import openai              # <--- Using openai instead of from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 import base64
 from io import StringIO
@@ -50,61 +50,70 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* Make the main container fit the entire screen, allow scrolling on small screens. */
+    /* Use a smoother, simpler gradient or background color for easier reading. */
     .stApp {
-        background: linear-gradient(135deg, #E3F2FD 0%, #FFF9C4 100%) !important;
+        background: linear-gradient(135deg, #F1F8E9 0%, #FFFFFF 100%) !important;
         font-family: "Helvetica Neue", Arial, sans-serif;
         color: #333;
         margin: 0 !important;
         padding: 0 !important;
         box-sizing: border-box;
-        min-height: 100vh !important; /* Use min-height instead of fixed height */
-        overflow: auto !important;    /* Allow page scrolling if needed */
+        /* Let height auto-adjust so content can scroll properly on mobile. */
+        height: auto !important;
         display: flex;
         flex-direction: column;
     }
 
-    /* Title and welcome message with minimal margins */
-    .title {
-        font-size: 1.2rem;
-        text-align: center;
-        margin: 0 !important;
-        padding: 4px 0 !important;
-    }
-    .welcome {
-        font-size: 0.9rem;
-        text-align: center;
-        margin: 0 !important;
-        padding: 2px 0 !important;
+    /* Slightly larger base font for better readability on mobile devices */
+    html, body, [class*="css"] {
+        font-size: 1rem;
     }
 
-    /* Fixed-size conversation box so it doesn't stretch endlessly.
-       Use overflow-y: auto to allow scrolling inside the box. */
+    /* Title and welcome message with minimal margins */
+    .title {
+        font-size: 1.3rem;
+        text-align: center;
+        margin: 0 !important;
+        padding: 6px 0 !important;
+        font-weight: bold;
+    }
+    .welcome {
+        font-size: 1rem;
+        text-align: center;
+        margin: 0 !important;
+        padding: 2px 0 10px 0 !important;
+        color: #555;
+    }
+
+    /* Let the conversation box grow and shrink with available space,
+       with a minimum height to remain usable on large screens. */
     .conversation-box {
         border: 1px solid #ddd;
         background-color: #fafafa;
         border-radius: 6px;
         padding: 0.5rem;
         margin: 0.5rem;
-        height: 30vh !important;   /* Default height on larger screens */
-        overflow-y: auto;          /* Scroll within the box if messages exceed this height */
-        flex: none;
+        min-height: 25vh;  /* fallback for larger devices */
+        flex-grow: 1;      /* allow the box to grow with content */
+        overflow-y: auto;  /* scroll within the box if messages overflow */
     }
 
-    /* Increase conversation box height on smaller screens (e.g., phones) */
+    /* Increase conversation box height on smaller screens (e.g., phones).
+       Using max-height instead of fixed height for a more fluid experience. */
     @media (max-width: 600px) {
         .conversation-box {
-            height: 40vh !important;
+            min-height: 40vh !important;
+            max-height: 70vh; /* it can grow but won't push everything off-screen */
         }
     }
 
     /* Properly wrap long text in messages */
     .user-message, .bot-message {
         word-wrap: break-word;
-        padding: 6px 8px;
+        padding: 8px 10px;
         margin: 6px 0;
         border-radius: 4px;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
 
     /* Style for user messages */
@@ -158,7 +167,7 @@ st.markdown(
     /* Send button styling inside forms (Blue) */
     .stButton button {
         background-color: #1976D2 !important;
-        color: #f2f2f2 !important; /* <--- Changed to a lighter text color */
+        color: #f2f2f2 !important;
         font-weight: 600;
         border: none;
         border-radius: 4px;
@@ -167,16 +176,16 @@ st.markdown(
         width: 100%;
         text-align: center;
         margin-top: 6px;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
     }
     .stButton button:hover {
         background-color: #115293 !important;
-        color: #ffffff !important; /* White text on hover */
+        color: #ffffff !important;
     }
 
     /* Slightly larger input text and spacing for better accessibility */
     .stTextInput label {
-        font-size: 0.9rem;
+        font-size: 1rem;
         font-weight: 600;
         margin-bottom: 0.3rem;
         color: #444444;
@@ -184,7 +193,7 @@ st.markdown(
     .stTextInput div[data-baseweb="input"] {
         background-color: #ffffff !important;
         color: #333333 !important;
-        min-height: 38px !important;
+        min-height: 42px !important;
         border: 1px solid #ccc !important;
         border-radius: 4px !important;
     }
@@ -194,7 +203,7 @@ st.markdown(
         display: flex;
         flex-direction: column;
         gap: 6px;
-        margin: 4px 0.5rem 0.5rem 0.5rem;
+        margin: 4px 0.5rem 1rem 0.5rem;
     }
 
     /* Style the scrollbar for the conversation box if content overflows */
@@ -234,12 +243,11 @@ def chatbot_response(user_input):
     truncate_history_if_needed()
 
     try:
-        # If you're using a newer openai library, you may prefer openai.ChatCompletion.create
         response = client.chat.completions.create(
             model="ft:gpt-4o-mini-2024-07-18:uolo-ai:uolobot-2:Ao6BTB9X",
             messages=st.session_state.conversation_history,
             temperature=1,
-            max_tokens=200,  # replaced max_completion_tokens with max_tokens
+            max_tokens=200,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
@@ -299,14 +307,14 @@ if "conversation_history" not in st.session_state:
 
 # Title and Welcome Message (no space above)
 st.markdown('<div class="title">UoloBot_2</div>', unsafe_allow_html=True)
-st.markdown('<div class="welcome">Welcome! I am UoloBot, I am here to help.</div>', unsafe_allow_html=True)
+st.markdown('<div class="welcome">Welcome! I am UoloBot, here to assist you.</div>', unsafe_allow_html=True)
 
 # Container to display chat
 def render_chat():
     chat_html = "<div class='conversation-box'>"
     for msg in st.session_state.conversation_history:
         if msg["role"] == "system":
-            # Skip or handle system messages differently if desired
+            # Skip system messages or handle them differently if desired
             continue
         elif msg["role"] == "user":
             chat_html += f"<div class='user-message'>You: {msg['content']}</div>"
@@ -325,7 +333,7 @@ def handle_message():
     # Clear the text input
     st.session_state["user_input_key"] = ""
 
-# Render chat box (fixed size)
+# Render chat box
 render_chat()
 
 # User input form + Send button
@@ -333,7 +341,9 @@ with st.form("user_input_form", clear_on_submit=True):
     st.text_input(
         "",
         key="user_input_key",
-        placeholder="Enter your message here..."
+        placeholder="Enter your message here...",
+        # Add aria-label for better accessibility in screen readers
+        aria_label="Chat input field"
     )
     st.form_submit_button("Send", on_click=handle_message)
 
@@ -341,6 +351,8 @@ with st.form("user_input_form", clear_on_submit=True):
 st.markdown("<div class='action-buttons'>", unsafe_allow_html=True)
 if st.button("Clear Chat"):
     clear_chat()
+
 download_link = get_download_link()
 st.markdown(download_link, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
