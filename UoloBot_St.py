@@ -226,16 +226,17 @@ def get_download_link():
 if "conversation_history" not in st.session_state:
     st.session_state.conversation_history = [
         {
-            {
-              "role": "system",
-              "content": "You are UoloBot, Uolo’s dedicated help desk assistant."
-                         "Always maintain a friendly, helpful tone. If a question is not addressed by your training data, politely instruct the user to contact the Uolo support team via WhatsApp. Do not offer to contact support on their behalf."
-                         "Always remain true to your fine-tuned training data."
-                         "Only answer questions related to the Uolo Edtech Platforms and educational doubts; politely refuse if unrelated."
-            }
+            "role": "system",
+            "content": (
+                "You are UoloBot, Uolo’s dedicated help desk assistant. "
+                "Always maintain a friendly, helpful tone. "
+                "If a question is not addressed by your training data, politely instruct the user to contact the Uolo support team via WhatsApp. "
+                "Do not offer to contact support on their behalf. "
+                "Always remain true to your fine-tuned training data. "
+                "Only answer questions related to the Uolo Edtech Platforms and educational doubts; politely refuse if unrelated."
+            )
         }
     ]
-
 st.markdown('<div class="title">UoloBot_2</div>', unsafe_allow_html=True)
 st.markdown('<div class="welcome">Welcome! I am UoloBot, here to assist you.</div>', unsafe_allow_html=True)
 
