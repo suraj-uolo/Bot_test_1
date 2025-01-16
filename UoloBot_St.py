@@ -55,22 +55,30 @@ st.markdown(
         padding: 2px 0 10px 0 !important;
         color: #555;
     }
+
+    /* ------------- Fixed-size conversation box ------------- */
     .conversation-box {
         border: 1px solid #ddd;
         background-color: #fafafa;
         border-radius: 6px;
         padding: 0.5rem;
         margin: 0.5rem;
-        min-height: 25vh;
-        flex-grow: 1;
-        overflow-y: auto;
+        /* Set a fixed (or max) height; adjust to your preference. */
+        height: 400px; 
+        max-height: 400px;
+        /* Make sure it can scroll */
+        overflow-y: auto;  
+        /* Prevent it from expanding further */
+        flex-grow: 0;  
     }
+    /* For smaller screens, you can reduce the height further */
     @media (max-width: 600px) {
         .conversation-box {
-            min-height: 40vh !important;
-            max-height: 70vh;
+            height: 300px;
+            max-height: 300px;
         }
     }
+
     .user-message, .bot-message {
         word-wrap: break-word;
         padding: 8px 10px;
@@ -220,9 +228,9 @@ if "conversation_history" not in st.session_state:
         {
             "role": "system",
             "content": (
-                "You are UoloBot, Uolo’s dedicated help desk assistant."
-                "Maintain a friendly tone."
-                "Always Remain true to your fine-tuned training data. "
+                "You are UoloBot, Uolo’s dedicated help desk assistant. "
+                "Maintain a friendly tone. "
+                "Always remain true to your fine-tuned training data. "
                 "Only answer questions about the Uolo Edtech Platforms and educational doubts; politely refuse if unrelated."
             )
         }
@@ -242,6 +250,17 @@ def render_chat():
             chat_html += f"<div class='bot-message'>UoloBot_2: {msg['content']}</div>"
     chat_html += "</div>"
     st.markdown(chat_html, unsafe_allow_html=True)
+
+    # Auto-scroll to the bottom after rendering
+    scroll_script = """
+    <script>
+    var conversationBox = document.querySelector('.conversation-box');
+    if (conversationBox){
+        conversationBox.scrollTop = conversationBox.scrollHeight;
+    }
+    </script>
+    """
+    st.markdown(scroll_script, unsafe_allow_html=True)
 
 def handle_message():
     user_text = st.session_state["user_input_key"]
