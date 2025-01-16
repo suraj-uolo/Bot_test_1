@@ -64,8 +64,8 @@ st.markdown(
         padding: 0.5rem;
         margin: 0.5rem;
         /* Set a fixed (or max) height; adjust to your preference. */
-        height: 400px; 
-        max-height: 400px;
+        height: 350px; 
+        max-height: 350px;
         /* Make sure it can scroll */
         overflow-y: auto;  
         /* Prevent it from expanding further */
@@ -74,8 +74,8 @@ st.markdown(
     /* For smaller screens, you can reduce the height further */
     @media (max-width: 600px) {
         .conversation-box {
-            height: 300px;
-            max-height: 300px;
+            height: 250px;
+            max-height: 250px;
         }
     }
 
